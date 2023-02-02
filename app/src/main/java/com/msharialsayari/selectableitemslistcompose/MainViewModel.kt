@@ -1,5 +1,6 @@
 package com.msharialsayari.selectableitemslistcompose
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.msharialsayari.selectableitemslistcompose.ui.components.Params
@@ -18,6 +19,10 @@ class MainViewModel @Inject constructor(): ViewModel()  {
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState
 
+    init{
+        getData()
+    }
+
     fun getData(){
 
         viewModelScope.launch {
@@ -26,7 +31,7 @@ class MainViewModel @Inject constructor(): ViewModel()  {
             }
             delay(3000)
             _uiState.update {
-                it.copy(dataList =  DataProvider.itemList , isLoading = false,isRefreshing = false)
+                it.copy(dataList =  DataProvider.itemList.toMutableList() , isLoading = false,isRefreshing = false)
             }
         }
 
@@ -41,7 +46,9 @@ class MainViewModel @Inject constructor(): ViewModel()  {
         }
 
         _uiState.update {
-            it.copy(dataList = newList)
+            it.copy(
+                dataList = newList,
+            )
         }
     }
 
@@ -53,7 +60,9 @@ class MainViewModel @Inject constructor(): ViewModel()  {
         newList.add(0,item)
 
         _uiState.update {
-            it.copy(dataList = newList)
+            it.copy(
+                dataList = newList,
+            )
         }
     }
 
@@ -65,34 +74,39 @@ class MainViewModel @Inject constructor(): ViewModel()  {
             _uiState.value.dataList.toMutableList().clear()
             delay(3000)
             _uiState.update {
-                it.copy(dataList = DataProvider.itemList, isLoading = false, isRefreshing = false)
+                it.copy(dataList = DataProvider.itemList.toMutableList(), isLoading = false, isRefreshing = false)
             }
         }
     }
 
-    private fun getItem(item:SelectableItemBase): SelectableItemBase? {
+    private fun getItem(item:Params): Params? {
         return _uiState.value.dataList.find { it.id == item.id }
+    }
+
+    private fun getIndex(item:Params): Int {
+        return _uiState.value.dataList.indexOf(item)
     }
 
     fun selectItem(item:Params){
 
-//        val newList = _uiState.value.dataList.toMutableList().apply {
-//            getItem(item)?.let {
-//                it.isSelected = !it.isSelected
-//            }
-//
-//        }
 
-        _uiState.value.dataList.forEach {
-            if (it.id == item.id){
-                it.isSelected = !it.isSelected
+        val index:Int
+        val newList = _uiState.value.dataList.toMutableList().apply {
+            index = indexOf(item)
+            removeIf { it.id == item.id }
+            item.apply {
+                isSelected = !isSelected
             }
+
+            add(index, item)
         }
 
-        val newList = _uiState.value.dataList
 
         _uiState.update {
-            it.copy(dataList = newList)
+            it.copy(
+                dataList = newList,
+                isSelectionMode = _uiState.value.dataList.any { it.isSelected }
+            )
         }
 
     }
@@ -107,7 +121,10 @@ class MainViewModel @Inject constructor(): ViewModel()  {
         val newList = _uiState.value.dataList
 
         _uiState.update {
-            it.copy(dataList = newList)
+            it.copy(
+                dataList = newList,
+                isSelectionMode = _uiState.value.dataList.any { it.isSelected }
+            )
         }
 
 

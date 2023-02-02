@@ -1,6 +1,13 @@
 package com.msharialsayari.selectableitemslistcompose.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,11 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun  <T>  SelectableItemList(
     modifier                    : Modifier = Modifier,
@@ -41,7 +50,7 @@ fun  <T>  SelectableItemList(
             LoadingView(loadingProgress)
         else{
             if (list.isNotEmpty()) {
-                val selectedList = list.filter { (it as SelectableItemBase).isSelected }
+
 
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -59,9 +68,14 @@ fun  <T>  SelectableItemList(
 
                     AnimatedVisibility(
                         modifier = Modifier.align(Alignment.BottomCenter),
-                        visible = isSelectionMode) {
+                        visible = isSelectionMode,
+                        enter = scaleIn(transformOrigin = TransformOrigin(0f, 0f)) +
+                                fadeIn() + expandIn(expandFrom = Alignment.TopStart),
+                        exit = scaleOut(transformOrigin = TransformOrigin(0f, 0f)) +
+                                fadeOut() + shrinkOut(shrinkTowards = Alignment.TopStart),
+                    ) {
                         ActionContainer(
-                            selectedItem = selectedList,
+                            selectedItem = list.filter { (it as SelectableItemBase).isSelected },
                             actions = actions
                         )
                     }
@@ -92,7 +106,12 @@ fun  <T>  LazyList(
 
     LazyColumn(modifier= modifier)
      {
-         itemsIndexed(list) { index, item ->
+         itemsIndexed(
+             items = list,
+             key = { _, item ->
+                 (item as SelectableItemBase).id
+             }
+         ) { index, item ->
              ItemList(view,item,index,isSelectionMode,onItemClicked,onItemLongClicked )
              if (index != list.lastIndex){
                  DividerView(dividerView)

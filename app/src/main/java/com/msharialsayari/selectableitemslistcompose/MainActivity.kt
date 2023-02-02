@@ -46,7 +46,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Greeting(viewModel:MainViewModel) {
-    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     val list = uiState.dataList
 
@@ -55,7 +54,7 @@ fun Greeting(viewModel:MainViewModel) {
         isVisible = true,
         action= ActionItem.Delete,
         onClicked = { items ->
-            viewModel.setSelectionMode(!uiState.isSelectionMode)
+            viewModel.setSelectionMode(false)
             items.forEach {
                 viewModel.removeItem(it)
             }
@@ -67,7 +66,7 @@ fun Greeting(viewModel:MainViewModel) {
         isVisible = uiState.dataList.filter { it.isSelected }.size == 1 ,
         action= ActionItem.Pin,
         onClicked = { items ->
-            viewModel.setSelectionMode(!uiState.isSelectionMode)
+            viewModel.setSelectionMode(false)
             items.forEach {
                 viewModel.pinItem(it)
             }
@@ -77,16 +76,12 @@ fun Greeting(viewModel:MainViewModel) {
 
 
 
-    LaunchedEffect(Unit){
-        viewModel.getData()
 
-    }
 
     LaunchedEffect(uiState.isSelectionMode){
         if (!uiState.isSelectionMode){
             viewModel.unselectAll()
         }
-
     }
 
 
@@ -100,14 +95,14 @@ fun Greeting(viewModel:MainViewModel) {
             if (uiState.isSelectionMode){
                 viewModel.selectItem(item)
             }
-
-
         },
         onItemLongClicked ={ item, position ->
             if (!uiState.isSelectionMode){
                 viewModel.selectItem(item)
+            }else{
+                viewModel.setSelectionMode(false)
             }
-           viewModel.setSelectionMode(!uiState.isSelectionMode)
+
 
         } ,
         isLoading = uiState.isLoading,
