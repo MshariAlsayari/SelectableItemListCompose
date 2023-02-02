@@ -1,10 +1,9 @@
 package com.msharialsayari.selectableitemslistcompose
 
-import android.util.Log
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.msharialsayari.selectableitemslistcompose.ui.components.Params
-import com.msharialsayari.selectableitemslistcompose.ui.components.SelectableItemBase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -79,20 +78,11 @@ class MainViewModel @Inject constructor(): ViewModel()  {
         }
     }
 
-    private fun getItem(item:Params): Params? {
-        return _uiState.value.dataList.find { it.id == item.id }
-    }
-
-    private fun getIndex(item:Params): Int {
-        return _uiState.value.dataList.indexOf(item)
-    }
-
     fun selectItem(item:Params){
 
 
-        val index:Int
+        val index: Int = _uiState.value.dataList.indexOf(item)
         val newList = _uiState.value.dataList.toMutableList().apply {
-            index = indexOf(item)
             removeIf { it.id == item.id }
             item.apply {
                 isSelected = !isSelected
@@ -141,7 +131,7 @@ class MainViewModel @Inject constructor(): ViewModel()  {
 
 
     data class MainUiState(
-        var dataList: List<Params> = mutableListOf(),
+        var dataList: MutableList<Params> = mutableStateListOf(),
         var isLoading: Boolean = false,
         var isRefreshing: Boolean = false,
         var isSelectionMode: Boolean = false

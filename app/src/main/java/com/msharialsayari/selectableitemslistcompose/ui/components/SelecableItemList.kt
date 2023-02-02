@@ -106,12 +106,7 @@ fun  <T>  LazyList(
 
     LazyColumn(modifier= modifier)
      {
-         itemsIndexed(
-             items = list,
-             key = { _, item ->
-                 (item as SelectableItemBase).id
-             }
-         ) { index, item ->
+         itemsIndexed(list) { index, item ->
              ItemList(view,item,index,isSelectionMode,onItemClicked,onItemLongClicked )
              if (index != list.lastIndex){
                  DividerView(dividerView)
