@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">SelectableItemsListCompose</string>
+
+    <string name="pin">Pin</string>
+    <string name="delete">Delete</string>
 </resources>

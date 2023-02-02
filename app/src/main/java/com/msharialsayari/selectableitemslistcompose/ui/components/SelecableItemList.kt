@@ -1,25 +1,10 @@
 package com.msharialsayari.selectableitemslistcompose.ui.components
 
-import android.provider.CalendarContract
-import android.provider.CalendarContract.Colors
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,7 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-
 
 
 @Composable
@@ -43,6 +27,7 @@ fun  <T>  SelectableItemList(
     isLoading                   : Boolean = false,
     isRefreshing                : Boolean = false,
     isSelectionMode             : Boolean = false,
+    actions                     : List<Action<T>> = listOf(),
     onRefresh                   : (() -> Unit)? = null,
 ){
 
@@ -56,15 +41,32 @@ fun  <T>  SelectableItemList(
             LoadingView(loadingProgress)
         else{
             if (list.isNotEmpty()) {
-                LazyList(
-                    modifier                    = modifier,
-                    list                        = list,
-                    view                        = view,
-                    isSelectionMode             = isSelectionMode,
-                    dividerView                 = dividerView,
-                    onItemClicked               = onItemClicked,
-                    onItemLongClicked           = onItemLongClicked,
-                )
+                val selectedList = list.filter { (it as SelectableItemBase).isSelected }
+
+                Box {
+
+                    LazyList(
+                        modifier                    = modifier,
+                        list                        = list,
+                        view                        = view,
+                        isSelectionMode             = isSelectionMode,
+                        dividerView                 = dividerView,
+                        onItemClicked               = onItemClicked,
+                        onItemLongClicked           = onItemLongClicked,
+                    )
+
+                    AnimatedVisibility(visible = isSelectionMode) {
+                        ActionContainer(
+                            modifier = Modifier.align(Alignment.BottomCenter),
+                            selectedItem = selectedList,
+                            actions = actions
+                        )
+                    }
+
+
+
+                }
+
             } else {
                 EmptyView(emptyView)
             }
@@ -151,8 +153,6 @@ fun LoadingView(view: (@Composable () -> Unit)?=null) {
     ) {
         if (view != null ){
             view()
-        }else{
-            CircularProgressIndicator()
         }
     }
 }
@@ -168,8 +168,6 @@ fun EmptyView(view: (@Composable () -> Unit)? = null) {
     ) {
         if (view != null ){
             view()
-        }else{
-            EmptyViewCompose()
         }
     }
 }
@@ -178,7 +176,5 @@ fun EmptyView(view: (@Composable () -> Unit)? = null) {
 fun DividerView(view: (@Composable () -> Unit)? = null) {
     if (view != null ){
         view()
-    }else{
-        Divider()
     }
 }
