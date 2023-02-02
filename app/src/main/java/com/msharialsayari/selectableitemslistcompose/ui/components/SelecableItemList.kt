@@ -43,7 +43,9 @@ fun  <T>  SelectableItemList(
             if (list.isNotEmpty()) {
                 val selectedList = list.filter { (it as SelectableItemBase).isSelected }
 
-                Box {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
 
                     LazyList(
                         modifier                    = modifier,
@@ -55,9 +57,10 @@ fun  <T>  SelectableItemList(
                         onItemLongClicked           = onItemLongClicked,
                     )
 
-                    AnimatedVisibility(visible = isSelectionMode) {
+                    AnimatedVisibility(
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        visible = isSelectionMode) {
                         ActionContainer(
-                            modifier = Modifier.align(Alignment.BottomCenter),
                             selectedItem = selectedList,
                             actions = actions
                         )
@@ -114,7 +117,7 @@ fun <T>ItemList(view : @Composable (T) -> Unit,
     Box(modifier =
     Modifier
         .fillMaxWidth()
-        .background(colorBackground.copy(alpha = 0.1f))
+        .background(if (isSelectionMode && (item as SelectableItemBase).isSelected) Color.Blue.copy(alpha = 0.1f) else Color.Transparent)
         .padding(start = startPadding)
         .combinedClickable(
             onClick = {
@@ -161,8 +164,8 @@ fun LoadingView(view: (@Composable () -> Unit)?=null) {
 fun EmptyView(view: (@Composable () -> Unit)? = null) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

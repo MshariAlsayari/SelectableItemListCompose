@@ -26,7 +26,7 @@ class MainViewModel @Inject constructor(): ViewModel()  {
             }
             delay(3000)
             _uiState.update {
-                it.copy(dataList =  DataProvider.itemList , isLoading = false)
+                it.copy(dataList =  DataProvider.itemList , isLoading = false,isRefreshing = false)
             }
         }
 
@@ -35,13 +35,38 @@ class MainViewModel @Inject constructor(): ViewModel()  {
 
 
 
-    fun removeItem(item:SelectableItemBase){
+    fun removeItem(item:Params){
         val newList = _uiState.value.dataList.toMutableList().apply {
             removeIf { it.id == item.id }
         }
 
         _uiState.update {
             it.copy(dataList = newList)
+        }
+    }
+
+    fun pinItem(item:Params){
+        val newList = _uiState.value.dataList.toMutableList().apply {
+            removeIf { it.id == item.id }
+        }
+
+        newList.add(0,item)
+
+        _uiState.update {
+            it.copy(dataList = newList)
+        }
+    }
+
+    fun refreshList(){
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(isRefreshing = true)
+            }
+            _uiState.value.dataList.toMutableList().clear()
+            delay(3000)
+            _uiState.update {
+                it.copy(dataList = DataProvider.itemList, isLoading = false, isRefreshing = false)
+            }
         }
     }
 

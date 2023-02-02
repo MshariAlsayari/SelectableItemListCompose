@@ -21,7 +21,7 @@ import com.msharialsayari.selectableitemslistcompose.ui.theme.SelectableItemsLis
 import dagger.hilt.android.AndroidEntryPoint
 
 
-var DEFAULT_LIST = DataProvider.itemList
+
 
 
 
@@ -48,24 +48,29 @@ class MainActivity : ComponentActivity() {
 fun Greeting(viewModel:MainViewModel) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
-    var isRefreshing by remember { mutableStateOf(false) }
+    val list = uiState.dataList
 
 
-    val deleteAction = Action<Params>(
+    val deleteAction = Action(
         isVisible = true,
         action= ActionItem.Delete,
         onClicked = { items ->
-            Toast.makeText(context, "Delete Action clicked and Selected items = ${items.size}", Toast.LENGTH_SHORT).show()
             viewModel.setSelectionMode(!uiState.isSelectionMode)
+            items.forEach {
+                viewModel.removeItem(it)
+            }
+
 
         })
 
-    val pinAction = Action<Params>(
+    val pinAction = Action(
         isVisible = uiState.dataList.filter { it.isSelected }.size == 1 ,
         action= ActionItem.Pin,
         onClicked = { items ->
-            Toast.makeText(context, "Pin Action clicked and Selected items = ${items.size}", Toast.LENGTH_SHORT).show()
             viewModel.setSelectionMode(!uiState.isSelectionMode)
+            items.forEach {
+                viewModel.pinItem(it)
+            }
 
         })
 
@@ -86,7 +91,7 @@ fun Greeting(viewModel:MainViewModel) {
 
 
     SelectableItemList(
-        list = uiState.dataList,
+        list = list,
         view = { SelectableItem(params = it) },
         dividerView = { Divider()},
         loadingProgress = { CircularProgressIndicator()},
@@ -106,14 +111,11 @@ fun Greeting(viewModel:MainViewModel) {
 
         } ,
         isLoading = uiState.isLoading,
-        isRefreshing = isRefreshing,
+        isRefreshing = uiState.isRefreshing,
         isSelectionMode = uiState.isSelectionMode,
         actions = listOf(deleteAction,pinAction),
         onRefresh={
-            isRefreshing = true
-            Handler(Looper.getMainLooper()).postDelayed({
-                isRefreshing = false
-            }, 2000)
+            viewModel.refreshList()
         },
     )
 
